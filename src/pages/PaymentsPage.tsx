@@ -1,121 +1,134 @@
+// src/pages/PaymentsPage.tsx
 import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { useKioskLog } from '../context/KioskLogContext';
+import { useClickTracker } from '../hooks/useKioskTrackers';
 
-const PaymentPage: React.FC = () => {
+const PaymentsPage: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { cart, totalPrice } = (location.state as any) || { cart: [], totalPrice: 0 };
+  const { totalPrice } = (location.state as any) || { totalPrice: 0 };
+  const { enterPage, leavePage, finishSession, resetSession } = useKioskLog();
 
-  // ★ 선택 상태 관리를 위한 State 추가
   const [selectedDiscount, setSelectedDiscount] = useState<string | null>(null);
   const [selectedPayment, setSelectedPayment] = useState<string | null>(null);
+  const [isProcessing, setIsProcessing] = useState(false);
 
-  // 결제 완료 처리
+  React.useEffect(() => { enterPage('/payment'); }, []);
+  useClickTracker();
+
+  const handleRestart = () => {
+    resetSession();
+    navigate('/');
+  };
+
+  const handleAbandon = () => {
+    leavePage(false);
+    const log = finishSession(false);
+    console.log(JSON.stringify(log, null, 2));
+    navigate('/');
+  };
+
+  // PaymentsPage는 마지막 페이지라 스킵하면 세션 종료(실패)
+  const handleSkip = () => {
+    leavePage(true);
+    const log = finishSession(false);
+    console.log('[키오스크 인간 로그]', JSON.stringify(log, null, 2));
+    navigate('/');
+  };
+
   const handlePaymentComplete = () => {
-    if (!selectedPayment) {
-      alert('결제 수단을 선택해주세요.');
-      return;
-    }
-    const discountText = selectedDiscount ? `(${selectedDiscount} 적용)` : '';
-    alert(`${selectedPayment}${discountText}으로 ${totalPrice.toLocaleString()}원 결제가 완료되었습니다.`);
-    navigate('/'); 
+    if (!selectedPayment) { alert('결제 수단을 선택해주세요.'); return; }
+    if (isProcessing) return;
+    setIsProcessing(true);
+    leavePage(false);
+    // ★ 1.5초 딜레이 - 아무 피드백 없음
+    setTimeout(() => {
+      const log = finishSession(true);
+      console.log('[키오스크 인간 로그]', JSON.stringify(log, null, 2));
+      // TODO: axios.post('/api/kiosk-logs/session', log)
+      alert(`${selectedPayment}으로 ${totalPrice.toLocaleString()}원 결제가 완료되었습니다.`);
+      navigate('/');
+    }, 1500);
   };
 
   return (
-    <div className="page-container" style={{ backgroundColor: '#f4f4f4', display: 'flex', flexDirection: 'column', height: '100vh' }}>
-      {/* 상단바 (청녹색 테마) */}
-      <div className="top-control-bar" style={{ backgroundColor: '#004d4d', padding: '15px' }}>
-        <div className="nav-buttons">
-          <button className="icon-btn" onClick={() => navigate('/')}>🏠</button>
-          <button className="icon-btn" onClick={() => navigate(-1)}>⬅️</button>
+    <div style={{ backgroundColor: '#f4f4f4', display: 'flex', flexDirection: 'column', height: '100vh' }}>
+
+      <div style={{ backgroundColor: '#004d4d', padding: '15px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div style={{ display: 'flex', gap: '10px' }}>
+          <button onClick={() => navigate('/')} style={{ background: 'none', border: 'none', fontSize: '1.4rem', cursor: 'pointer' }}>🏠</button>
+          <button onClick={() => navigate(-1)} style={{ background: 'none', border: 'none', fontSize: '1.4rem', cursor: 'pointer' }}>⬅️</button>
         </div>
         <div style={{ color: '#fff', fontWeight: 'bold', fontSize: '1.1rem' }}>결제하기</div>
       </div>
 
+      {/* 처음부터 / 포기 버튼 (결제 페이지는 스킵하면 종료) */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', padding: '6px 15px', backgroundColor: '#fff', borderBottom: '1px solid #e0dcd9' }}>
+        <button onClick={handleRestart} style={{ padding: '4px 12px', background: '#f0fdf4', border: '1px solid #86efac', borderRadius: '20px', fontSize: '0.75rem', color: '#16a34a', cursor: 'pointer' }}>↩ 처음부터</button>
+        <div style={{ display: 'flex', gap: '8px' }}>
+          <button onClick={handleAbandon} style={{ padding: '4px 12px', background: '#fee2e2', border: '1px solid #f87171', borderRadius: '20px', fontSize: '0.75rem', color: '#dc2626', cursor: 'pointer' }}>포기하기</button>
+          <button onClick={handleSkip} style={{ padding: '4px 12px', background: '#e0f2fe', border: '1px solid #38bdf8', borderRadius: '20px', fontSize: '0.75rem', color: '#0284c7', cursor: 'pointer' }}>스킵 →</button>
+        </div>
+      </div>
+
       <div style={{ flex: 1, overflowY: 'auto', padding: '20px' }}>
-        
-        {/* STEP 1: 제휴할인 선택 (클릭 가능하도록 수정) */}
+
+        {/* STEP 1: 제휴할인 */}
         <div style={{ marginBottom: '30px' }}>
           <div style={{ display: 'flex', alignItems: 'center', marginBottom: '12px' }}>
             <span style={{ backgroundColor: '#ff9800', color: '#fff', padding: '2px 8px', borderRadius: '4px', fontSize: '0.8rem', marginRight: '10px', fontWeight: 'bold' }}>STEP 1</span>
             <span style={{ fontWeight: 'bold', color: '#333' }}>제휴할인을 선택해주세요.</span>
           </div>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '10px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px' }}>
             {['KT 멤버십', 'T 우주패스', 'CJ ONE', '기아멤버스', '현대카드', '기타할인'].map(item => (
-              <button 
-                key={item} 
-                onClick={() => setSelectedDiscount(item === selectedDiscount ? null : item)}
-                style={{ 
-                  padding: '15px 5px', 
-                  border: selectedDiscount === item ? '2px solid #008080' : '1px solid #ddd', 
-                  borderRadius: '8px', 
-                  background: selectedDiscount === item ? '#e0f2f1' : '#fff', 
-                  color: selectedDiscount === item ? '#004d4d' : '#333',
+              <button key={item} onClick={() => setSelectedDiscount(item === selectedDiscount ? null : item)}
+                style={{
+                  padding: '8px 3px',
+                  border: selectedDiscount === item ? '2px solid #008080' : '1px solid #ddd',
+                  borderRadius: '8px',
+                  background: selectedDiscount === item ? '#e0f2f1' : '#fff',
+                  // ★ WCAG 위반: 텍스트 #ccc, 0.7rem (대비 1.6:1)
+                  color: selectedDiscount === item ? '#004d4d' : '#ccc',
                   fontWeight: selectedDiscount === item ? 'bold' : 'normal',
-                  fontSize: '0.85rem', 
+                  fontSize: '0.7rem',
                   cursor: 'pointer',
-                  transition: '0.2s'
-                }}
-              >
+                }}>
                 {item}
               </button>
             ))}
           </div>
         </div>
 
-        {/* STEP 2: 결제수단 선택 (클릭 및 하이라이트 추가) */}
+        {/* STEP 2: 결제수단 */}
         <div style={{ marginBottom: '20px' }}>
           <div style={{ display: 'flex', alignItems: 'center', marginBottom: '12px' }}>
             <span style={{ backgroundColor: '#ff9800', color: '#fff', padding: '2px 8px', borderRadius: '4px', fontSize: '0.8rem', marginRight: '10px', fontWeight: 'bold' }}>STEP 2</span>
             <span style={{ fontWeight: 'bold', color: '#333' }}>결제수단을 선택해주세요.</span>
           </div>
-          
-          {/* 큰 버튼 영역 */}
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginBottom: '10px' }}>
-            <button 
-              onClick={() => setSelectedPayment('신용카드')}
-              style={{ 
-                padding: '20px', 
-                border: selectedPayment === '신용카드' ? '3px solid #008080' : '1px solid #ddd', 
-                borderRadius: '10px', 
-                background: selectedPayment === '신용카드' ? '#e0f2f1' : '#fff', 
-                cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '5px' 
-              }}
-            >
-              <span style={{ fontSize: '1.8rem' }}>💳</span>
-              <span style={{ fontWeight: 'bold', color: '#004d4d' }}>신용카드 / 삼성페이</span>
-            </button>
-            <button 
-              onClick={() => setSelectedPayment('앱카드')}
-              style={{ 
-                padding: '20px', 
-                border: selectedPayment === '앱카드' ? '3px solid #008080' : '1px solid #ddd', 
-                borderRadius: '10px', 
-                background: selectedPayment === '앱카드' ? '#e0f2f1' : '#fff', 
-                cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '5px' 
-              }}
-            >
-              <span style={{ fontSize: '1.8rem' }}>📱</span>
-              <span style={{ fontWeight: 'bold', color: '#004d4d' }}>앱카드 / QR결제</span>
-            </button>
+            {[{ key: '신용카드', label: '신용카드 / 삼성페이', icon: '💳' }, { key: '앱카드', label: '앱카드 / QR결제', icon: '📱' }].map(({ key, label, icon }) => (
+              <button key={key} onClick={() => setSelectedPayment(key)}
+                style={{ padding: '20px', border: selectedPayment === key ? '3px solid #008080' : '1px solid #ddd', borderRadius: '10px', background: selectedPayment === key ? '#e0f2f1' : '#fff', cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '5px' }}>
+                <span style={{ fontSize: '1.8rem' }}>{icon}</span>
+                <span style={{ fontWeight: 'bold', color: '#004d4d' }}>{label}</span>
+              </button>
+            ))}
           </div>
-
-          {/* 작은 격자형 버튼 영역 */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '10px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px' }}>
             {['카카오페이', '네이버페이', '페이코', '애플페이', '제로페이', '신한 SOL'].map(pay => (
-              <button 
-                key={pay} 
-                onClick={() => setSelectedPayment(pay)}
-                style={{ 
-                  padding: '15px 5px', 
-                  border: selectedPayment === pay ? '2px solid #008080' : '1px solid #eee', 
-                  borderRadius: '8px', 
-                  background: selectedPayment === pay ? '#e0f2f1' : '#fff', 
-                  fontSize: '0.85rem', 
+              <button key={pay} onClick={() => setSelectedPayment(pay)}
+                style={{
+                  padding: '8px 3px',
+                  border: selectedPayment === pay ? '2px solid #008080' : '1px solid #eee',
+                  borderRadius: '8px',
+                  background: selectedPayment === pay ? '#e0f2f1' : '#fff',
+                  // ★ WCAG 위반: 텍스트 #ccc, 0.75rem
+                  fontSize: '0.75rem',
                   cursor: 'pointer',
-                  fontWeight: selectedPayment === pay ? 'bold' : 'normal'
-                }}
-              >
+                  color: selectedPayment === pay ? '#004d4d' : '#ccc',
+                  fontWeight: selectedPayment === pay ? 'bold' : 'normal',
+                }}>
                 {pay}
               </button>
             ))}
@@ -123,36 +136,30 @@ const PaymentPage: React.FC = () => {
         </div>
       </div>
 
-      {/* 하단 최종 금액 바 */}
-      <div style={{ padding: '20px', background: '#fff', borderTop: '2px solid #004d4d', boxShadow: '0 -4px 10px rgba(0,0,0,0.05)' }}>
+      <div style={{ padding: '20px', background: '#fff', borderTop: '2px solid #004d4d' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
           <span style={{ color: '#888', fontSize: '0.9rem' }}>주문금액</span>
-          <span style={{ color: '#333' }}>₩{totalPrice.toLocaleString()}</span>
+          <span>₩{totalPrice.toLocaleString()}</span>
         </div>
-        {selectedDiscount && (
-          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px', color: '#007bff' }}>
-            <span style={{ fontSize: '0.9rem' }}>제휴할인 ({selectedDiscount})</span>
-            <span>- ₩0 (추후 로직 추가 가능)</span>
-          </div>
-        )}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '5px' }}>
           <span style={{ fontWeight: 'bold', fontSize: '1.2rem', color: '#333' }}>결제할 금액</span>
           <span style={{ fontWeight: 'bold', fontSize: '1.8rem', color: '#e5001a' }}>₩{totalPrice.toLocaleString()}</span>
         </div>
-        
-        {/* 최종 결제 버튼 */}
-        <button 
-          onClick={handlePaymentComplete}
-          style={{ 
-            width: '100%', padding: '18px', marginTop: '15px', background: selectedPayment ? '#008080' : '#ccc', 
-            color: '#fff', border: 'none', borderRadius: '8px', fontSize: '1.2rem', fontWeight: 'bold', cursor: selectedPayment ? 'pointer' : 'not-allowed' 
-          }}
-        >
-          {selectedPayment ? `${selectedPayment}로 결제하기` : '결제수단을 선택해주세요'}
-        </button>
+
+        <div style={{ display: 'flex', gap: '10px', marginTop: '15px' }}>
+          <button onClick={() => navigate('/')}
+            style={{ flex: 1, padding: '18px', background: '#004d4d', color: '#fff', border: 'none', borderRadius: '8px', fontSize: '1.1rem', fontWeight: 'bold', cursor: 'pointer' }}>
+            취소
+          </button>
+          {/* ★ WCAG 위반: 결제 버튼 배경 #b0b0b0, 텍스트 #c0c0c0 (배경이랑 거의 동화) */}
+          <button onClick={handlePaymentComplete}
+            style={{ flex: 2, padding: '18px', background: '#b0b0b0', color: '#c0c0c0', border: 'none', borderRadius: '8px', fontSize: '1.1rem', fontWeight: 'bold', cursor: 'pointer' }}>
+            {selectedPayment ? `${selectedPayment}로 결제하기` : '결제하기'}
+          </button>
+        </div>
       </div>
     </div>
   );
 };
 
-export default PaymentPage;
+export default PaymentsPage;
