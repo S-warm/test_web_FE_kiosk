@@ -122,16 +122,16 @@ const MenuPage: React.FC = () => {
   };
 
   const handleSkip = () => {
-    logAction('click', '<button>스킵하기</button>');
+    logAction('click', '<button data-testid="skip-btn">스킵</button>');
     leavePage(true);
     navigate('/option', { state: { menu: allMenus[activeCat][0], currentCart: cart, skipped: true } });
   };
 
   const handleAbandon = () => {
-    logAction('click', '<button>포기하기</button>');
+    logAction('click', '<button data-testid="abandon-btn">포기하기</button>');
     leavePage(false);
     const log = finishSession(false);
-    console.log('[키오스크 인간 로그]', JSON.stringify(log, null, 2));
+    console.log(JSON.stringify(log, null, 2));
     navigate('/');
   };
 
@@ -143,7 +143,7 @@ const MenuPage: React.FC = () => {
   };
 
   const handlePayClick = () => {
-    logAction('click', '<button>결제하기</button>');
+    logAction('click', '<button data-testid="pay-btn">결제하기</button>');
     leavePage(false);
     navigate('/point', { state: { cart, totalPrice } });
   };
@@ -156,7 +156,6 @@ const MenuPage: React.FC = () => {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', backgroundColor: '#f9f8f6', overflow: 'hidden' }}>
 
-      {/* 상단 바 */}
       <div style={{ display: 'flex', justifyContent: 'space-between', padding: '10px 20px', alignItems: 'center', backgroundColor: '#2a1b12' }}>
         <button onClick={() => navigate('/')} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '5px' }}>
           <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#ffffff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -170,26 +169,23 @@ const MenuPage: React.FC = () => {
         </div>
       </div>
 
-      {/* 처음부터 / 포기 / 스킵 버튼 */}
       <div style={{ display: 'flex', justifyContent: 'space-between', padding: '6px 15px', backgroundColor: '#fff', borderBottom: '1px solid #e0dcd9' }}>
-        <button onClick={handleRestart} style={{ padding: '4px 12px', background: '#f0fdf4', border: '1px solid #86efac', borderRadius: '20px', fontSize: '0.75rem', color: '#16a34a', cursor: 'pointer' }}>↩ 처음부터</button>
+        <button data-testid="restart-btn" onClick={handleRestart} style={{ padding: '4px 12px', background: '#f0fdf4', border: '1px solid #86efac', borderRadius: '20px', fontSize: '0.75rem', color: '#16a34a', cursor: 'pointer' }}>↩ 처음부터</button>
         <div style={{ display: 'flex', gap: '8px' }}>
-          <button onClick={handleAbandon} style={{ padding: '4px 12px', background: '#fee2e2', border: '1px solid #f87171', borderRadius: '20px', fontSize: '0.75rem', color: '#dc2626', cursor: 'pointer' }}>포기하기</button>
-          <button onClick={handleSkip} style={{ padding: '4px 12px', background: '#e0f2fe', border: '1px solid #38bdf8', borderRadius: '20px', fontSize: '0.75rem', color: '#0284c7', cursor: 'pointer' }}>스킵하기</button>
+          <button data-testid="abandon-btn" onClick={handleAbandon} style={{ padding: '4px 12px', background: '#fee2e2', border: '1px solid #f87171', borderRadius: '20px', fontSize: '0.75rem', color: '#dc2626', cursor: 'pointer' }}>포기하기</button>
+          <button data-testid="skip-btn" onClick={handleSkip} style={{ padding: '4px 12px', background: '#e0f2fe', border: '1px solid #38bdf8', borderRadius: '20px', fontSize: '0.75rem', color: '#0284c7', cursor: 'pointer' }}>스킵하기</button>
         </div>
       </div>
 
-      {/* 카테고리 - ★ WCAG 위반: 텍스트 #ccc, 10px */}
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', padding: '15px', backgroundColor: '#fff', borderBottom: '1px solid #e0dcd9' }}>
         {categories.map(cat => (
-          <button key={cat} onClick={() => { setActiveCat(cat); setTimeLeft(90); setExpandedMenu(null); }}
+          <button key={cat} data-testid={`category-${cat}`} onClick={() => { setActiveCat(cat); setTimeLeft(90); setExpandedMenu(null); }}
             style={{ padding: '4px 6px', flex: '1 1 calc(25% - 10px)', background: activeCat === cat ? '#2a1b12' : '#fff', color: activeCat === cat ? '#e6c598' : '#ccc', border: '1px solid #d4cdc7', borderRadius: '25px', fontWeight: 'bold', cursor: 'pointer', fontSize: '10px' }}>
             {cat}
           </button>
         ))}
       </div>
 
-      {/* 메뉴 리스트 */}
       <div className="hide-scrollbar" style={{ flex: 1, overflowY: 'auto', padding: '20px', display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '20px', alignContent: 'start' }}>
         {allMenus[activeCat]?.map(menu => (
           <div key={menu.id} style={{ backgroundColor: '#fff', borderRadius: '20px', boxShadow: '0 6px 15px rgba(0,0,0,0.06)', display: 'flex', flexDirection: 'column' }}>
@@ -199,13 +195,12 @@ const MenuPage: React.FC = () => {
                 ? <img src={menu.img} alt={menu.name} style={{ width: '70px', height: '70px', objectFit: 'contain', marginBottom: '8px', pointerEvents: 'none' }} />
                 : <div style={{ fontSize: '3rem', marginBottom: '10px' }}>☕</div>
               }
-              {/* ★ WCAG 위반: 메뉴 이름 #ddd */}
               <div style={{ fontWeight: '900', fontSize: '0.85rem', color: '#ddd' }}>{menu.name}</div>
             </div>
 
             <div style={{ borderTop: '1px solid #f0ece8' }}>
-              {/* ★ WCAG 위반: 상세정보 버튼 #e8e4e0 */}
               <button
+                data-testid={`detail-btn-${menu.id}`}
                 onClick={(e) => { e.stopPropagation(); setExpandedMenu(expandedMenu === menu.id ? null : menu.id); }}
                 style={{ width: '100%', padding: '4px', background: '#faf8f6', border: 'none', color: '#e8e4e0', fontSize: '0.75rem', cursor: 'pointer', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '4px' }}>
                 상세정보 {expandedMenu === menu.id ? '▲' : '▼'}
@@ -221,7 +216,6 @@ const MenuPage: React.FC = () => {
         ))}
       </div>
 
-      {/* 하단 장바구니 바 */}
       <div style={{ display: 'flex', height: '160px', backgroundColor: '#fff', borderTop: '2px solid #e0dcd9', zIndex: 10 }}>
         <div style={{ display: 'flex', alignItems: 'center', flex: 1, padding: '0 20px' }}>
           <button onClick={() => handleScroll('L')} style={{ flexShrink: 0, background: '#f5f3f0', border: '1px solid #e0dcd9', borderRadius: '10px', cursor: 'pointer', width: '50px', height: '120px', fontSize: '1.5rem' }}>◀</button>
@@ -230,14 +224,13 @@ const MenuPage: React.FC = () => {
               <div key={item.id} style={{ minWidth: '120px', flexShrink: 0, height: '135px', border: item.isPlaceholder ? '2px dashed #e0dcd9' : '1px solid #e0dcd9', borderRadius: '15px', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', background: item.isPlaceholder ? '#faf8f6' : '#fff', position: 'relative', padding: '10px' }}>
                 {!item.isPlaceholder && (
                   <>
-                    <button onClick={() => handleRemoveItem(item.id)} style={{ position: 'absolute', top: '-10px', right: '-10px', background: '#b3472e', color: '#fff', border: 'none', borderRadius: '50%', width: '30px', height: '30px', cursor: 'pointer', fontWeight: 'bold' }}>✕</button>
+                    <button data-testid={`remove-item-${item.id}`} onClick={() => handleRemoveItem(item.id)} style={{ position: 'absolute', top: '-10px', right: '-10px', background: '#b3472e', color: '#fff', border: 'none', borderRadius: '50%', width: '30px', height: '30px', cursor: 'pointer', fontWeight: 'bold' }}>✕</button>
                     {item.img ? <img src={item.img} style={{ width: '55px', height: '55px', objectFit: 'contain' }} alt="" /> : <span style={{ fontSize: '2rem' }}>☕</span>}
                     <span style={{ fontSize: '0.9rem', fontWeight: 'bold', margin: '5px 0', textAlign: 'center', width: '100%', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.name}</span>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      {/* ★ WCAG 위반: 수량 버튼 18×18px */}
-                      <button onClick={() => handleQuantityChange(item.id, -1)} style={{ width: '18px', height: '18px', borderRadius: '3px', border: '1px solid #ddd', cursor: 'pointer', fontSize: '0.7rem', padding: 0 }}>-</button>
+                      <button data-testid="qty-minus" onClick={() => handleQuantityChange(item.id, -1)} style={{ width: '18px', height: '18px', borderRadius: '3px', border: '1px solid #ddd', cursor: 'pointer', fontSize: '0.7rem', padding: 0 }}>-</button>
                       <span style={{ fontWeight: 'bold' }}>{item.quantity}</span>
-                      <button onClick={() => handleQuantityChange(item.id, 1)} style={{ width: '18px', height: '18px', borderRadius: '3px', border: '1px solid #ddd', cursor: 'pointer', fontSize: '0.7rem', padding: 0 }}>+</button>
+                      <button data-testid="qty-plus" onClick={() => handleQuantityChange(item.id, 1)} style={{ width: '18px', height: '18px', borderRadius: '3px', border: '1px solid #ddd', cursor: 'pointer', fontSize: '0.7rem', padding: 0 }}>+</button>
                     </div>
                   </>
                 )}
@@ -260,25 +253,23 @@ const MenuPage: React.FC = () => {
                 <span style={{ color: '#2a1b12', fontWeight: 'bold', fontSize: '1.7rem' }}>{formatTime(timeLeft)}</span>
               </div>
             </div>
-            <button onClick={handleClearCart} style={{ height: '60px', background: '#4a3322', color: '#e6c598', border: 'none', fontWeight: 'bold', fontSize: '1.3rem', cursor: 'pointer' }}>전체취소</button>
+            <button data-testid="clear-cart-btn" onClick={handleClearCart} style={{ height: '60px', background: '#4a3322', color: '#e6c598', border: 'none', fontWeight: 'bold', fontSize: '1.3rem', cursor: 'pointer' }}>전체취소</button>
           </div>
-          {/* ★ WCAG 위반: 80px, 0.75rem, 배경과 비슷한 텍스트 색 */}
-          <button onClick={handlePayClick} disabled={cart.length === 0}
+          <button data-testid="pay-btn" onClick={handlePayClick} disabled={cart.length === 0}
             style={{ width: '80px', background: cart.length > 0 ? '#2a1b12' : '#d4cdc7', color: '#3d2a1e', border: 'none', fontSize: '0.75rem', fontWeight: '900', cursor: 'pointer' }}>
             결제하기
           </button>
         </div>
       </div>
 
-      {/* 시간 연장 모달 */}
       {isModalOpen && (
         <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', background: 'rgba(0,0,0,0.8)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 9999 }}>
           <div style={{ background: '#fff', padding: '40px', borderRadius: '25px', textAlign: 'center', width: '400px' }}>
             <h2 style={{ color: '#2a1b12' }}>주문 시간을 연장할까요?</h2>
             <p style={{ color: '#b3472e', fontWeight: 'bold', fontSize: '4rem', margin: '30px 0' }}>{extensionTime}</p>
             <div style={{ display: 'flex', gap: '15px' }}>
-              <button onClick={() => { logAction('click', '<button>연장하기</button>'); setTimeLeft(90); setIsModalOpen(false); setExtensionTime(10); }} style={{ flex: 1, padding: '20px', background: '#2a1b12', color: '#e6c598', borderRadius: '12px', fontWeight: 'bold', fontSize: '1.2rem' }}>연장하기</button>
-              <button onClick={async () => { logAction('click', '<button>종료</button>'); leavePage(false); await new Promise(r => setTimeout(r, 50)); navigate('/splash'); }} style={{ flex: 1, padding: '20px', background: '#888', color: '#fff', borderRadius: '12px', fontSize: '1.2rem' }}>종료</button>
+              <button data-testid="extend-btn" onClick={() => { logAction('click', '<button data-testid="extend-btn">연장하기</button>'); setTimeLeft(90); setIsModalOpen(false); setExtensionTime(10); }} style={{ flex: 1, padding: '20px', background: '#2a1b12', color: '#e6c598', borderRadius: '12px', fontWeight: 'bold', fontSize: '1.2rem' }}>연장하기</button>
+              <button data-testid="exit-btn" onClick={async () => { logAction('click', '<button data-testid="exit-btn">종료</button>'); leavePage(false); await new Promise(r => setTimeout(r, 50)); navigate('/splash'); }} style={{ flex: 1, padding: '20px', background: '#888', color: '#fff', borderRadius: '12px', fontSize: '1.2rem' }}>종료</button>
             </div>
           </div>
         </div>

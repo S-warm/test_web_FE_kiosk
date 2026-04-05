@@ -83,7 +83,7 @@ export const KioskLogProvider: React.FC<{
     if (!currentPage.current) return;
     currentPage.current.actions.push({
       action_type: actionType,
-      target_html: targetHtml.slice(0, 150),
+      target_html: targetHtml,
       timestamp: new Date().toISOString(),
       ...(count && count > 1 ? { count } : {}),
     });

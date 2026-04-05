@@ -19,13 +19,12 @@ export const useClickTracker = () => {
 
       if (!interactable && !el.textContent?.trim()) return;
 
-      const html = el.outerHTML.slice(0, 150);
+      const html = el.outerHTML;
       const now = Date.now();
 
       clickBuffer.current = clickBuffer.current.filter(c => now - c.time < 1500);
       clickBuffer.current.push({ html, time: now });
 
-      // 디바운스: 300ms 동안 같은 요소 추가 클릭 기다렸다가 한 번에 기록
       if (debounceTimer.current) clearTimeout(debounceTimer.current);
       debounceTimer.current = setTimeout(() => {
         const sameEl = clickBuffer.current.filter(c => c.html === html);
@@ -37,7 +36,6 @@ export const useClickTracker = () => {
           logAction('click', html);
         }
 
-        // 해당 요소 버퍼 제거
         clickBuffer.current = clickBuffer.current.filter(c => c.html !== html);
       }, 300);
     };

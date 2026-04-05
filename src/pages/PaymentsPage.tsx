@@ -33,7 +33,7 @@ const PaymentsPage: React.FC = () => {
   const handleSkip = () => {
     leavePage(true);
     const log = finishSession(false);
-    console.log('[키오스크 인간 로그]', JSON.stringify(log, null, 2));
+    console.log(JSON.stringify(log, null, 2));
     navigate('/');
   };
 
@@ -45,7 +45,7 @@ const PaymentsPage: React.FC = () => {
     // ★ 1.5초 딜레이 - 아무 피드백 없음
     setTimeout(() => {
       const log = finishSession(true);
-      console.log('[키오스크 인간 로그]', JSON.stringify(log, null, 2));
+      console.log(JSON.stringify(log, null, 2));
       // TODO: axios.post('/api/kiosk-logs/session', log)
       alert(`${selectedPayment}으로 ${totalPrice.toLocaleString()}원 결제가 완료되었습니다.`);
       navigate('/');
