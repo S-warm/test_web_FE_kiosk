@@ -1,0 +1,9 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* 터치 드래그 방지 및 키오스크 느낌 내기 */
+body {
+  user-select: none;
+  touch-action: pan-y;
+}
