@@ -1,5 +1,6 @@
 // src/pages/PaymentsPage.tsx
 import React, { useState } from 'react';
+import axios from 'axios';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useKioskLog } from '../context/KioskLogContext';
 import { useClickTracker } from '../hooks/useKioskTrackers';
@@ -25,15 +26,18 @@ const PaymentsPage: React.FC = () => {
   const handleAbandon = () => {
     leavePage(false);
     const log = finishSession(false);
-    console.log(JSON.stringify(log, null, 2));
+    axios.post('http://localhost:8080/api/kiosk-logs/session', log)
+      .then(() => console.log('저장 완료'))
+      .catch(e => console.error('저장 실패', e));
     navigate('/');
   };
 
-  // PaymentsPage는 마지막 페이지라 스킵하면 세션 종료(실패)
   const handleSkip = () => {
     leavePage(true);
     const log = finishSession(false);
-    console.log(JSON.stringify(log, null, 2));
+    axios.post('http://localhost:8080/api/kiosk-logs/session', log)
+      .then(() => console.log('저장 완료'))
+      .catch(e => console.error('저장 실패', e));
     navigate('/');
   };
 
@@ -42,11 +46,11 @@ const PaymentsPage: React.FC = () => {
     if (isProcessing) return;
     setIsProcessing(true);
     leavePage(false);
-    // ★ 1.5초 딜레이 - 아무 피드백 없음
     setTimeout(() => {
       const log = finishSession(true);
-      console.log(JSON.stringify(log, null, 2));
-      // TODO: axios.post('/api/kiosk-logs/session', log)
+      axios.post('http://localhost:8080/api/kiosk-logs/session', log)
+        .then(() => console.log('저장 완료'))
+        .catch(e => console.error('저장 실패', e));
       alert(`${selectedPayment}으로 ${totalPrice.toLocaleString()}원 결제가 완료되었습니다.`);
       navigate('/');
     }, 1500);
@@ -63,7 +67,6 @@ const PaymentsPage: React.FC = () => {
         <div style={{ color: '#fff', fontWeight: 'bold', fontSize: '1.1rem' }}>결제하기</div>
       </div>
 
-      {/* 처음부터 / 포기 버튼 (결제 페이지는 스킵하면 종료) */}
       <div style={{ display: 'flex', justifyContent: 'space-between', padding: '6px 15px', backgroundColor: '#fff', borderBottom: '1px solid #e0dcd9' }}>
         <button onClick={handleRestart} style={{ padding: '4px 12px', background: '#f0fdf4', border: '1px solid #86efac', borderRadius: '20px', fontSize: '0.75rem', color: '#16a34a', cursor: 'pointer' }}>↩ 처음부터</button>
         <div style={{ display: 'flex', gap: '8px' }}>
@@ -74,7 +77,6 @@ const PaymentsPage: React.FC = () => {
 
       <div style={{ flex: 1, overflowY: 'auto', padding: '20px' }}>
 
-        {/* STEP 1: 제휴할인 */}
         <div style={{ marginBottom: '30px' }}>
           <div style={{ display: 'flex', alignItems: 'center', marginBottom: '12px' }}>
             <span style={{ backgroundColor: '#ff9800', color: '#fff', padding: '2px 8px', borderRadius: '4px', fontSize: '0.8rem', marginRight: '10px', fontWeight: 'bold' }}>STEP 1</span>
@@ -88,7 +90,6 @@ const PaymentsPage: React.FC = () => {
                   border: selectedDiscount === item ? '2px solid #008080' : '1px solid #ddd',
                   borderRadius: '8px',
                   background: selectedDiscount === item ? '#e0f2f1' : '#fff',
-                  // ★ WCAG 위반: 텍스트 #ccc, 0.7rem (대비 1.6:1)
                   color: selectedDiscount === item ? '#004d4d' : '#ccc',
                   fontWeight: selectedDiscount === item ? 'bold' : 'normal',
                   fontSize: '0.7rem',
@@ -100,7 +101,6 @@ const PaymentsPage: React.FC = () => {
           </div>
         </div>
 
-        {/* STEP 2: 결제수단 */}
         <div style={{ marginBottom: '20px' }}>
           <div style={{ display: 'flex', alignItems: 'center', marginBottom: '12px' }}>
             <span style={{ backgroundColor: '#ff9800', color: '#fff', padding: '2px 8px', borderRadius: '4px', fontSize: '0.8rem', marginRight: '10px', fontWeight: 'bold' }}>STEP 2</span>
@@ -123,7 +123,6 @@ const PaymentsPage: React.FC = () => {
                   border: selectedPayment === pay ? '2px solid #008080' : '1px solid #eee',
                   borderRadius: '8px',
                   background: selectedPayment === pay ? '#e0f2f1' : '#fff',
-                  // ★ WCAG 위반: 텍스트 #ccc, 0.75rem
                   fontSize: '0.75rem',
                   cursor: 'pointer',
                   color: selectedPayment === pay ? '#004d4d' : '#ccc',
@@ -151,7 +150,7 @@ const PaymentsPage: React.FC = () => {
             style={{ flex: 1, padding: '18px', background: '#004d4d', color: '#fff', border: 'none', borderRadius: '8px', fontSize: '1.1rem', fontWeight: 'bold', cursor: 'pointer' }}>
             취소
           </button>
-          {/* ★ WCAG 위반: 결제 버튼 배경 #b0b0b0, 텍스트 #c0c0c0 (배경이랑 거의 동화) */}
+          {/* ★ WCAG 위반: 결제 버튼 배경 #b0b0b0, 텍스트 #c0c0c0 */}
           <button onClick={handlePaymentComplete}
             style={{ flex: 2, padding: '18px', background: '#b0b0b0', color: '#c0c0c0', border: 'none', borderRadius: '8px', fontSize: '1.1rem', fontWeight: 'bold', cursor: 'pointer' }}>
             {selectedPayment ? `${selectedPayment}로 결제하기` : '결제하기'}
