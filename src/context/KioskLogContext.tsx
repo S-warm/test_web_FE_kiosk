@@ -11,7 +11,7 @@ export interface ActionLog {
 export interface PageLog {
   step_order: number;
   url: string;
-  duration_ms: number;
+  page_duration_ms: number;
   skipped: boolean;
   actions: ActionLog[];
 }
@@ -20,7 +20,7 @@ export interface SessionLog {
   session_id: string;
   persona_age: number;
   is_success: boolean;
-  duration_ms: number;
+  total_duration_ms: number;
   pages: PageLog[];
 }
 
@@ -49,7 +49,7 @@ export const KioskLogProvider: React.FC<{
     session_id: generateSessionId(),
     persona_age: personaAge,
     is_success: false,
-    duration_ms: 0,
+    total_duration_ms: 0,
     pages: [],
   });
 
@@ -61,7 +61,7 @@ export const KioskLogProvider: React.FC<{
     const page: PageLog = {
       step_order: stepOrder.current,
       url,
-      duration_ms: 0,
+      page_duration_ms: 0,
       skipped: false,
       actions: [],
     };
@@ -71,7 +71,7 @@ export const KioskLogProvider: React.FC<{
 
   const leavePage = useCallback((skipped = false) => {
     if (!currentPage.current) return;
-    currentPage.current.duration_ms = Date.now() - pageEnterTime.current;
+    currentPage.current.page_duration_ms = Date.now() - pageEnterTime.current;
     if (skipped) currentPage.current.skipped = true;
   }, []);
 
@@ -91,11 +91,11 @@ export const KioskLogProvider: React.FC<{
 
   const finishSession = useCallback((isSuccess: boolean): SessionLog => {
     if (currentPage.current) {
-      currentPage.current.duration_ms = Date.now() - pageEnterTime.current;
+      currentPage.current.page_duration_ms = Date.now() - pageEnterTime.current;
     }
     const hasSkip = log.current.pages.some(p => p.skipped);
     log.current.is_success = isSuccess && !hasSkip;
-    log.current.duration_ms = Date.now() - startTime.current;
+    log.current.total_duration_ms = Date.now() - startTime.current;
     return JSON.parse(JSON.stringify(log.current));
   }, []);
 
@@ -105,7 +105,7 @@ export const KioskLogProvider: React.FC<{
       session_id: generateSessionId(),
       persona_age: personaAge,
       is_success: false,
-      duration_ms: 0,
+      total_duration_ms: 0,
       pages: [],
     };
     stepOrder.current = 0;
