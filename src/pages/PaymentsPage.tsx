@@ -26,7 +26,7 @@ const PaymentsPage: React.FC = () => {
   const handleAbandon = () => {
     leavePage(false);
     const log = finishSession(false);
-    axios.post('http://localhost:8080/api/kiosk-logs/session', log)
+    axios.post('${import.meta.env.VITE_API_URL}/api/kiosk-logs/session', log)
       .then(() => console.log('저장 완료'))
       .catch(e => console.error('저장 실패', e));
     navigate('/');
@@ -35,7 +35,7 @@ const PaymentsPage: React.FC = () => {
   const handleSkip = () => {
     leavePage(true);
     const log = finishSession(false);
-    axios.post('http://localhost:8080/api/kiosk-logs/session', log)
+    axios.post('${import.meta.env.VITE_API_URL}/api/kiosk-logs/session', log)
       .then(() => console.log('저장 완료'))
       .catch(e => console.error('저장 실패', e));
     navigate('/');
@@ -48,7 +48,7 @@ const PaymentsPage: React.FC = () => {
     leavePage(false);
     setTimeout(() => {
       const log = finishSession(true);
-      axios.post('http://localhost:8080/api/kiosk-logs/session', log)
+      axios.post('${import.meta.env.VITE_API_URL}/api/kiosk-logs/session', log)
         .then(() => console.log('저장 완료'))
         .catch(e => console.error('저장 실패', e));
       alert(`${selectedPayment}으로 ${totalPrice.toLocaleString()}원 결제가 완료되었습니다.`);
