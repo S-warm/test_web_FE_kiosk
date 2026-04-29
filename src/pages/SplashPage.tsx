@@ -6,9 +6,12 @@ import { useClickTracker } from '../hooks/useKioskTrackers';
 
 const SplashPage: React.FC = () => {
   const navigate = useNavigate();
-  const { enterPage, leavePage, logAction } = useKioskLog();
+  const { enterPage, leavePage, logAction, resetSession } = useKioskLog();
 
-  useEffect(() => { enterPage('/splash'); }, []);
+  useEffect(() => {
+    resetSession();
+    enterPage('/splash');
+  }, []);
   useClickTracker();
 
   const posterUrl = "https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?q=80&w=2070&auto=format&fit=crop";

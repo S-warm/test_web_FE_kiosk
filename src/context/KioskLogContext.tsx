@@ -18,7 +18,6 @@ export interface PageLog {
 
 export interface SessionLog {
   session_id: string;
-  persona_age: number;
   is_success: boolean;
   total_duration_ms: number;
   pages: PageLog[];
@@ -38,16 +37,14 @@ const generateSessionId = () =>
   `kiosk_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
 
 export const KioskLogProvider: React.FC<{
-  personaAge: number;
   children: React.ReactNode;
-}> = ({ personaAge, children }) => {
+}> = ({ children }) => {
   const startTime = useRef(Date.now());
   const stepOrder = useRef(0);
   const pageEnterTime = useRef(Date.now());
 
   const log = useRef<SessionLog>({
     session_id: generateSessionId(),
-    persona_age: personaAge,
     is_success: false,
     total_duration_ms: 0,
     pages: [],
@@ -103,7 +100,6 @@ export const KioskLogProvider: React.FC<{
   const resetSession = useCallback(() => {
     log.current = {
       session_id: generateSessionId(),
-      persona_age: personaAge,
       is_success: false,
       total_duration_ms: 0,
       pages: [],
@@ -111,7 +107,7 @@ export const KioskLogProvider: React.FC<{
     stepOrder.current = 0;
     startTime.current = Date.now();
     currentPage.current = null;
-  }, [personaAge]);
+  }, []);
 
   return (
     <KioskLogContext.Provider value={{ enterPage, leavePage, logAction, finishSession, resetSession }}>
