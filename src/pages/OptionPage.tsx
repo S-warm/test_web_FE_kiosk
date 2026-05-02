@@ -17,21 +17,23 @@ const OptionPage: React.FC = () => {
   const [quantity, setQuantity] = useState(1);
   const [flashMsg, setFlashMsg] = useState<string | null>(null);
   const [selections, setSelections] = useState<Record<string, string>>(
-    { temp: '', cinnamon: '', strength: '', syrup: '', stevia: '', milk: '', cup: '', whip: '' }
+    { temp: '', cinnamon: 'X', strength: '', syrup: 'none', stevia: 'none', milk: 'none', cup: '', whip: 'none' }
   );
+
+  const requiredGroups = ['temp', 'strength', 'cup'];
 
   React.useEffect(() => { enterPage('/option'); }, []);
   useClickTracker();
 
   const optionGroups = [
     { id: 'temp', title: '온도(필수)', options: [{ id: 'ice', label: 'ICE', price: 0, icon: '🧊', img: '' }, { id: 'hot', label: 'HOT', price: 0, icon: '🔥', img: '' }] },
-    { id: 'cinnamon', title: '시나몬 여부(필수)', options: [{ id: 'O', label: '시나몬 O', price: 0, icon: '☕', img: 'https://m.cookienbaking.co.kr/web/product/big/202409/7b6e0ff47e00e1b32f65fc1ec47b4766.jpg' }, { id: 'X', label: '시나몬 X', price: 0, icon: '❌', img: '' }] },
     { id: 'strength', title: '농도(필수)', options: [{ id: 'light', label: '연하게', price: 0, icon: '💧', img: '' }, { id: 'normal', label: '보통', price: 0, icon: '☕', img: '' }, { id: 'shot', label: '샷 추가', price: 500, icon: '☕', img: shot1Img }, { id: 'twoshot', label: '2샷 추가', price: 1000, icon: '☕☕', img: shot2Img }] },
-    { id: 'syrup', title: '시럽추가(필수)', options: [{ id: 'none', label: '선택안함', price: 0, icon: '❌', img: '' }, { id: 'hazelnut', label: '헤이즐넛', price: 500, img: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQIoR3R6tH4g9ZoHsN7L8XsXPK-JegDOCT1xw&s' }, { id: 'vanilla', label: '바닐라', price: 500, icon: '🍯', img: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTLdkP-XS0dI1iGuYsN7h5TEMgjZ3Kc1x6PQA&s' }, { id: 'lightv', label: '라이트바닐라', price: 800, icon: '🍯', img: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSxtStUDupk37bytkc2YYegsrzWeyPCBQR0Qg&s' }] },
-    { id: 'stevia', title: '저당 스테비아(필수)', options: [{ id: 'none', label: '선택안함', price: 0, icon: '❌', img: '' }, { id: 'add', label: '스테비아 추가', price: 600, icon: '🌿', img: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR_S9EEMxEsHHgaWBCgRwjbt22Id1LiZieXFw&s' }] },
-    { id: 'milk', title: '우유 변경(필수)', options: [{ id: 'none', label: '선택안함', price: 0, icon: '❌', img: '' }, { id: 'almond', label: '아몬드밀크', price: 500, icon: '🥛', img: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQlhHiN2sAkk4ZJGFlxcH-vvI-pLCAD_Yqgmg&s' }] },
     { id: 'cup', title: '컵 선택(필수)', options: [{ id: 'paper', label: '종이컵', price: 0, icon: '🥤', img: '' }, { id: 'personal', label: '개인컵 할인', price: -200, icon: '♻️', img: '' }, { id: 'tumbler', label: '텀블러', price: 0, icon: '🧉', img: '' }] },
-    { id: 'whip', title: '휘핑크림(필수)', options: [{ id: 'none', label: '선택안함', price: 0, icon: '❌', img: '' }, { id: 'add', label: '휘핑 추가', price: 500, icon: '🍦', img: '' }, { id: 'extra', label: '휘핑 많이', price: 800, icon: '🍦🍦', img: '' }] },
+    { id: 'cinnamon', title: '시나몬 여부(선택)', options: [{ id: 'O', label: '시나몬 O', price: 0, icon: '☕', img: 'https://m.cookienbaking.co.kr/web/product/big/202409/7b6e0ff47e00e1b32f65fc1ec47b4766.jpg' }, { id: 'X', label: '시나몬 X', price: 0, icon: '❌', img: '' }] },
+    { id: 'syrup', title: '시럽추가(선택)', options: [{ id: 'none', label: '선택안함', price: 0, icon: '❌', img: '' }, { id: 'hazelnut', label: '헤이즐넛', price: 500, img: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQIoR3R6tH4g9ZoHsN7L8XsXPK-JegDOCT1xw&s' }, { id: 'vanilla', label: '바닐라', price: 500, icon: '🍯', img: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTLdkP-XS0dI1iGuYsN7h5TEMgjZ3Kc1x6PQA&s' }, { id: 'lightv', label: '라이트바닐라', price: 800, icon: '🍯', img: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSxtStUDupk37bytkc2YYegsrzWeyPCBQR0Qg&s' }] },
+    { id: 'stevia', title: '저당 스테비아(선택)', options: [{ id: 'none', label: '선택안함', price: 0, icon: '❌', img: '' }, { id: 'add', label: '스테비아 추가', price: 600, icon: '🌿', img: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR_S9EEMxEsHHgaWBCgRwjbt22Id1LiZieXFw&s' }] },
+    { id: 'milk', title: '우유 변경(선택)', options: [{ id: 'none', label: '선택안함', price: 0, icon: '❌', img: '' }, { id: 'almond', label: '아몬드밀크', price: 500, icon: '🥛', img: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQlhHiN2sAkk4ZJGFlxcH-vvI-pLCAD_Yqgmg&s' }] },
+    { id: 'whip', title: '휘핑크림(선택)', options: [{ id: 'none', label: '선택안함', price: 0, icon: '❌', img: '' }, { id: 'add', label: '휘핑 추가', price: 500, icon: '🍦', img: '' }, { id: 'extra', label: '휘핑 많이', price: 800, icon: '🍦🍦', img: '' }] },
   ];
 
   const showFlash = (msg: string) => {
@@ -77,7 +79,7 @@ const OptionPage: React.FC = () => {
   };
 
   const handleAddToCart = () => {
-    const unselected = optionGroups.filter(g => !selections[g.id]);
+    const unselected = optionGroups.filter(g => requiredGroups.includes(g.id) && !selections[g.id]);
     if (unselected.length > 0) {
       showFlash(`[${unselected.map(g => g.title.replace('(필수)', '')).join(', ')}] 항목을 선택해주세요.`);
       return;
@@ -141,7 +143,7 @@ const OptionPage: React.FC = () => {
           <span style={{ color: '#888', marginRight: '5px' }}>선택된 옵션 |</span>
           <strong style={{ color: '#2a1b12' }}>{selectedOptionsText}</strong>
         </div>
-        <button onClick={() => setSelections({ temp: '', cinnamon: '', strength: '', syrup: '', stevia: '', milk: '', cup: '', whip: '' })}
+        <button onClick={() => setSelections({ temp: '', cinnamon: 'X', strength: '', syrup: 'none', stevia: 'none', milk: 'none', cup: '', whip: 'none' })}
           style={{ flexShrink: 0, padding: '5px 12px', backgroundColor: '#fff', border: '1px solid #b3472e', color: '#b3472e', borderRadius: '20px', fontSize: '0.8rem', fontWeight: 'bold', cursor: 'pointer' }}>
           ⟳ 초기화
         </button>

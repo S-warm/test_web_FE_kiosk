@@ -20,10 +20,9 @@ const MenuPage: React.FC = () => {
   const { enterPage, leavePage, logAction, finishSession, resetSession } = useKioskLog();
   const [activeCat, setActiveCat] = useState('커피');
   const [lang, setLang] = useState('KR');
-  const [timeLeft, setTimeLeft] = useState(90);
+  const [timeLeft, setTimeLeft] = useState(180);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [extensionTime, setExtensionTime] = useState(10);
-  const [expandedMenu, setExpandedMenu] = useState<number | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   const [cart, setCart] = useState<CartItem[]>(() => {
@@ -179,8 +178,8 @@ const MenuPage: React.FC = () => {
 
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', padding: '15px', backgroundColor: '#fff', borderBottom: '1px solid #e0dcd9' }}>
         {categories.map(cat => (
-          <button key={cat} data-testid={`category-${cat}`} onClick={() => { setActiveCat(cat); setTimeLeft(90); setExpandedMenu(null); }}
-            style={{ padding: '4px 6px', flex: '1 1 calc(25% - 10px)', background: activeCat === cat ? '#2a1b12' : '#fff', color: activeCat === cat ? '#e6c598' : '#ccc', border: '1px solid #d4cdc7', borderRadius: '25px', fontWeight: 'bold', cursor: 'pointer', fontSize: '10px' }}>
+          <button key={cat} data-testid={`category-${cat}`} onClick={() => { setActiveCat(cat); setTimeLeft(180); setExpandedMenu(null); }}
+            style={{ padding: '4px 6px', flex: '1 1 calc(25% - 10px)', background: activeCat === cat ? '#2a1b12' : '#fff', color: activeCat === cat ? '#e6c598' : '#666', border: '1px solid #d4cdc7', borderRadius: '25px', fontWeight: 'bold', cursor: 'pointer', fontSize: '10px' }}>
             {cat}
           </button>
         ))}
@@ -195,22 +194,8 @@ const MenuPage: React.FC = () => {
                 ? <img src={menu.img} alt={menu.name} style={{ width: '70px', height: '70px', objectFit: 'contain', marginBottom: '8px', pointerEvents: 'none' }} />
                 : <div style={{ fontSize: '3rem', marginBottom: '10px' }}>☕</div>
               }
-              <div style={{ fontWeight: '900', fontSize: '0.85rem', color: '#ddd' }}>{menu.name}</div>
-            </div>
-
-            <div style={{ borderTop: '1px solid #f0ece8' }}>
-              <button
-                data-testid={`detail-btn-${menu.id}`}
-                onClick={(e) => { e.stopPropagation(); setExpandedMenu(expandedMenu === menu.id ? null : menu.id); }}
-                style={{ width: '100%', padding: '4px', background: '#faf8f6', border: 'none', color: '#e8e4e0', fontSize: '0.75rem', cursor: 'pointer', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '4px' }}>
-                상세정보 {expandedMenu === menu.id ? '▲' : '▼'}
-              </button>
-              {expandedMenu === menu.id && (
-                <div style={{ padding: '10px 15px', backgroundColor: '#faf8f6', borderTop: '1px solid #f0ece8' }}>
-                  <div style={{ color: '#c97a5e', fontWeight: 'bold', fontSize: '1.1rem', marginBottom: '6px' }}>₩ {menu.price.toLocaleString()}</div>
-                  <div style={{ fontSize: '0.8rem', color: '#666', lineHeight: '1.5' }}>{menu.desc}</div>
-                </div>
-              )}
+              <div style={{ fontWeight: '900', fontSize: '0.85rem', color: '#333' }}>{menu.name}</div>
+              <div style={{ color: '#c97a5e', fontWeight: 'bold', fontSize: '0.95rem', marginTop: '6px' }}>₩ {menu.price.toLocaleString()}</div>
             </div>
           </div>
         ))}
