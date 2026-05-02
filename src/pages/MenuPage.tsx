@@ -137,7 +137,7 @@ const MenuPage: React.FC = () => {
   const handleMenuClick = (menu: any) => {
     logAction('click', `<div data-menu="${menu.name}">${menu.name} 선택</div>`);
     leavePage(false);
-    setTimeLeft(90);
+    setTimeLeft(180);
     navigate('/option', { state: { menu, currentCart: cart } });
   };
 
@@ -253,7 +253,7 @@ const MenuPage: React.FC = () => {
             <h2 style={{ color: '#2a1b12' }}>주문 시간을 연장할까요?</h2>
             <p style={{ color: '#b3472e', fontWeight: 'bold', fontSize: '4rem', margin: '30px 0' }}>{extensionTime}</p>
             <div style={{ display: 'flex', gap: '15px' }}>
-              <button data-testid="extend-btn" onClick={() => { logAction('click', '<button data-testid="extend-btn">연장하기</button>'); setTimeLeft(90); setIsModalOpen(false); setExtensionTime(10); }} style={{ flex: 1, padding: '20px', background: '#2a1b12', color: '#e6c598', borderRadius: '12px', fontWeight: 'bold', fontSize: '1.2rem' }}>연장하기</button>
+              <button data-testid="extend-btn" onClick={() => { logAction('click', '<button data-testid="extend-btn">연장하기</button>'); setTimeLeft(180); setIsModalOpen(false); setExtensionTime(10); }} style={{ flex: 1, padding: '20px', background: '#2a1b12', color: '#e6c598', borderRadius: '12px', fontWeight: 'bold', fontSize: '1.2rem' }}>연장하기</button>
               <button data-testid="exit-btn" onClick={async () => { logAction('click', '<button data-testid="exit-btn">종료</button>'); leavePage(false); await new Promise(r => setTimeout(r, 50)); navigate('/splash'); }} style={{ flex: 1, padding: '20px', background: '#888', color: '#fff', borderRadius: '12px', fontSize: '1.2rem' }}>종료</button>
             </div>
           </div>
