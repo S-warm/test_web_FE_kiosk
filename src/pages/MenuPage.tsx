@@ -178,7 +178,7 @@ const MenuPage: React.FC = () => {
 
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', padding: '15px', backgroundColor: '#fff', borderBottom: '1px solid #e0dcd9' }}>
         {categories.map(cat => (
-          <button key={cat} data-testid={`category-${cat}`} onClick={() => { setActiveCat(cat); setTimeLeft(180); setExpandedMenu(null); }}
+          <button key={cat} data-testid={`category-${cat}`} onClick={() => { setActiveCat(cat); setTimeLeft(180); }}
             style={{ padding: '4px 6px', flex: '1 1 calc(25% - 10px)', background: activeCat === cat ? '#2a1b12' : '#fff', color: activeCat === cat ? '#e6c598' : '#666', border: '1px solid #d4cdc7', borderRadius: '25px', fontWeight: 'bold', cursor: 'pointer', fontSize: '10px' }}>
             {cat}
           </button>
